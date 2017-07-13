@@ -1,0 +1,30 @@
+.App{
+  height: 100%;
+  position: relative;
+  top: 5px;
+}
+.grey-box {
+  background-color: #eeeeee;
+}
+.container {
+  padding: 15px;
+}
+.box {
+  border: 1px solid lightgrey;
+}
+.celebrityRank{
+  background-color: blue;
+}
+.celebritiesList {
+  width: 50%;
+  text-align: center;
+  margin-left: 25%;
+  padding: 15px;
+}
+.celebrityHeader {
+  background-color: royalblue;
+  color: white;
+}
+.celebrityItemDetail{
+  padding: 10px 15px;
+}
