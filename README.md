@@ -11,9 +11,12 @@ git clone https://github.com/roshan-lanewala/ReactTop50RichestCelebritiesApp.git
 
 cd my-app
 npm install
-npm run api
 npm start
 ```
+
+npm start command : this will start a full mock API on port 4000 and also start the client on port 3000.
+use http:localhost:3000/ will run the client
+use http:localhost:4000/celebrities will return a json Array of Top 50 Celebrities 
 
 Using [json-server](https://github.com/typicode/json-server), build a mock API.
 
