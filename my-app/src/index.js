@@ -5,6 +5,15 @@ import App from './App';
 import registerServiceWorker from './registerServiceWorker';
 import data from './__dummyData/celebrityRichList.json'
 
+const findIndex = (arr, filterCallback) => {
+     return arr.reduce(function(carry, item, idx) {
+         if(filterCallback(item, idx)){
+             return idx;
+         }
+         return carry;
+     }, -1);
+}
+
 const getSelectCurrencyValue = (selectedCurrency = "US DOLLAR") => {
     if(selectedCurrency.toUpperCase() === "US DOLLAR") {
         return data.usDollarValue || 1;
@@ -18,8 +27,8 @@ const getSelectCurrencyValue = (selectedCurrency = "US DOLLAR") => {
 }
 
 const getUnique = (prevValue, elem) => {
-    if(prevValue.findIndex((f) => f.label === elem) === -1) {
-        prevValue.push({value: elem, label: elem});
+    if(findIndex(prevValue, function(f){ return f.label === elem}) === -1) {
+        prevValue.push({value: elem, label:elem});
     }
     return prevValue;
 }
