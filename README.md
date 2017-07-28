@@ -11,8 +11,11 @@ git clone https://github.com/roshan-lanewala/ReactTop50RichestCelebritiesApp.git
 
 cd my-app
 npm install
+npm run api
 npm start
 ```
+
+Using [json-server](https://github.com/typicode/json-server), build a mock API.
 
 ### Production usage
 ```sh
