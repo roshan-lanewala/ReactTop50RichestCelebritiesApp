@@ -11,7 +11,7 @@ git clone https://github.com/roshan-lanewala/ReactTop50RichestCelebritiesApp.git
 
 cd my-app
 npm install
-npm run
+npm start
 ```
 
 ### Production usage
