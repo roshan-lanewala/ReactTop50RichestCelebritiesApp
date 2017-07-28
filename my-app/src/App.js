@@ -1,106 +1,62 @@
 import React, { Component } from 'react';
-import Filter from './components/filter'
-import CelebritiesList from './components/celebritiesList'
-import '../node_modules/bootstrap/dist/css/bootstrap.css'
+import axios from 'axios';
+import Filter from './components/filter';
+import * as handlers from './handlers/celebrityServiceHandler';
+import CelebritiesList from './components/celebritiesList';
+import '../node_modules/bootstrap/dist/css/bootstrap.css';
 import './App.css';
 
-const sortByRank = (a, b) => {
-  if(a.rank < b.rank) {
-    return -1;
-  }
-  if(a.rank > b.rank) {
-    return 1;
-  }
-}
-
-const sortByName = (a, b) => {
-  let nameA = a.name.toUpperCase();
-  let nameB = b.name.toUpperCase();
-  if(nameA < nameB) {
-    return -1;
-  }
-  if(nameA > nameB) {
-    return 1;
-  }
-  return 0;
-}
-
-const sortByAge = (a, b) => {
-  if(a.age < b.age) {
-    return -1;
-  }
-  if(a.age > b.age) {
-    return 1;
-  }
-}
-
 class App extends Component {
-  getFilteredCelebrities = (celebrities) => {
-    var filteredResult = this.state.celebrities;
-    filteredResult = filteredResult.filter(celeb => this.state.selectedBirthPlace === 'Show All' 
-                        || celeb.country === this.state.selectedBirthPlace);
+  update = (f, callback, ...args) => this.setState(f(this.state, ...args), callback);
 
-    filteredResult = filteredResult.filter(celeb => 
-                        this.state.searchText.trim() === "" 
-                        || (celeb.name.toUpperCase().indexOf(this.state.searchText.toUpperCase()) !== -1
-                        || celeb.age.indexOf(this.state.searchText.toUpperCase()) !== -1
-                        || celeb.netWorth.toString().indexOf(this.state.searchText.toUpperCase()) !== -1))
+  getFilteredCelebritiesFunc = () => this.update(handlers.getFilteredCelebrities);
 
-    if(this.state.selectedSortBy.toUpperCase() === "RANK") {
-      filteredResult = filteredResult.sort(sortByRank)
-    } else if(this.state.selectedSortBy.toUpperCase() === "AGE") {
-      filteredResult = filteredResult.sort(sortByAge)
-    } else if(this.state.selectedSortBy.toUpperCase() === "NAME") {
-      filteredResult = filteredResult.sort(sortByName)
-    }
-    this.setState({...this.state, filteredCelebrities: filteredResult});
-  }
-
-  onSelectBirthPlaceChange = (selectedItem) => {
-    this.setState({ ...this.state, selectedBirthPlace: selectedItem.value }, this.getFilteredCelebrities);
-  }
-
-  onSelectCurrencyConverterChange = (selectedItem) => {
-    const selectedCurrencyValue = this.state.getSelectCurrencyValue();
-    this.setState({ ...this.state, 
-                    selectedCurrencyConverter: selectedItem.value,
-                    currencySymbol: selectedItem.displaySymbol,
-                    currencyValue: selectedCurrencyValue
-                  }, this.getFilteredCelebrities);
-  }
-
-  onSelectSortByChange = (selectedItem) => {
-    this.setState({...this.state, selectedSortBy: selectedItem.value}, this.getFilteredCelebrities);
-  }
-
-  onSearchTextChanged = (newText) => {
-    this.setState({...this.state, searchText: newText.target.value}, this.getFilteredCelebrities);
-  }
+  actions = {
+    getFilteredCelebrities: this.getFilteredCelebritiesFunc,
+    onSelectBirthPlaceChange: (selectedItem) => this.update(handlers.onSelectBirthPlaceChange, this.getFilteredCelebritiesFunc, selectedItem),
+    onSelectCurrencyConverterChange: (selectedItem) => this.update(handlers.onSelectCurrencyConverterChange, this.getFilteredCelebritiesFunc, selectedItem),
+    onSelectSortByChange: (selectedItem) => this.update(handlers.onSelectSortByChange, this.getFilteredCelebritiesFunc, selectedItem),
+    onSearchTextChanged: (newSearchText) => this.update(handlers.onSearchTextChanged, this.getFilteredCelebritiesFunc, newSearchText)
+  };
 
   constructor(props){
     super(props);
     this.state = {
-      ...this.props,
-      currencySymbol: this.props.defaultCurrencySymbol,
-      currencyValue: this.props.defaultCurrencyValue
-    };
+      selectedBirthPlace: "Show All",
+      selectedCurrencyConverter: "US Dollar",
+      selectedSortBy: "Rank",
+      searchText: "",
+      currencySymbol: "$USD",
+     };
     
   }
 
   componentDidMount = () => {
-    this.getFilteredCelebrities();
+   axios.get('/celebrities')
+    .then((res) => {
+      
+      this.setState({
+        ...res.data[0],
+        birthPlaces: handlers.getBirthPlaces(res.data[0].celebrityList),
+        currencyConverters: handlers.getCurrencyConverters(),
+        sortByList: handlers.getSortByList(),
+        celebrities: res.data[0].celebrityList,
+        currencyValue: res.data[0].usDollarValue
+      }, this.getFilteredCelebritiesFunc);
+      
+    })
+    .catch((err) => console.warn(err));
   }
 
   render() {
-    return (
-      <div className="App">
+    return ( <div className="App">
         <div className="row form-group">
             <div className="col-xs-12 text-center">
-              <h1>{this.props.pageTitleH1}</h1>
-              <h2>{this.props.pageTitleH2}</h2>
-              <div>{this.props.description}</div>
+              <h1>{this.state.pageTitleH1}</h1>
+              <h2>{this.state.pageTitleH2}</h2>
+              <div>{this.state.description}</div>
               <div style={{marginTop:"1.5em"}}>
-                Reference: <a href={this.props.referenceLink}>{this.props.referenceLink}</a>
+                Reference: <a href={this.state.referenceLink}>{this.state.referenceLink}</a>
               </div>
             </div>
           </div>
@@ -109,14 +65,14 @@ class App extends Component {
             <Filter 
               birthPlaces={this.state.birthPlaces}
               selectedBirthPlace={this.state.selectedBirthPlace}
-              onSelectBirthPlaceChange={this.onSelectBirthPlaceChange}
+              onSelectBirthPlaceChange={this.actions.onSelectBirthPlaceChange}
               currencyConverters={this.state.currencyConverters}
               selectedCurrencyConverter={this.state.selectedCurrencyConverter}
-              onSelectCurrencyConverterChange={this.onSelectCurrencyConverterChange}
+              onSelectCurrencyConverterChange={this.actions.onSelectCurrencyConverterChange}
               sortByList={this.state.sortByList}
               selectedSortBy={this.state.selectedSortBy} 
-              onSelectSortByChange={this.onSelectSortByChange}
-              onSearchTextChanged={this.onSearchTextChanged} />
+              onSelectSortByChange={this.actions.onSelectSortByChange}
+              onSearchTextChanged={this.actions.onSearchTextChanged} />
           </div>
           <div className="row form-group">
             <CelebritiesList theCelebrities={this.state.filteredCelebrities} 

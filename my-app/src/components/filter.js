@@ -17,7 +17,7 @@ export const Filter = ({birthPlaces,
             <div className="col-md-3 col-md-offset-3">
                 <label htmlFor="selectBirthPlaces">Birthplace:</label>
                 <Select name="selectBirthPlaces" 
-                        options={birthPlaces} 
+                        options={birthPlaces}
                         value={selectedBirthPlace} 
                         onChange={onSelectBirthPlaceChange} />
             </div>
